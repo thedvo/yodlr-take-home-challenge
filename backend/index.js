@@ -6,6 +6,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var logger = require('./lib/logger');
 var cors = require('cors');
+const morgan = require('morgan');
 
 var users = require('./routes/users');
 
@@ -16,6 +17,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(cors());
+app.use(morgan('dev'));
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // /users will prefix every route in route.js

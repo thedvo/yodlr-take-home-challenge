@@ -14,16 +14,27 @@ var curId = _.size(users);
 // _.size() method gets the size of collection by returning its length for array
 // variable named curId for "current ID" ---> value increments as you add users
 
+const jsonschema = require('jsonschema');
+const userRegisterSchema = require('../schema/userRegister.json');
+const userUpdateSchema = require('../schema/userUpdate.json');
+
+const { BadRequestError } = require('../expressError');
 /** ****************************************************************************** */
 
 /* GET users listing. */
 router.get('/', function (req, res) {
-	res.json(_.toArray(users));
+	return res.json(_.toArray(users));
 	// lodash .toArray() method is used to convert a given value into an array. In this case, the user data obj. from init_data.json will be converted.
 });
 
 /* Create a new user */
 router.post('/', function (req, res) {
+	const validator = jsonschema.validate(req.body, userRegisterSchema);
+	if (!validator.valid) {
+		const errs = validator.errors.map((e) => e.stack);
+		throw new BadRequestError(errs);
+	}
+
 	var user = req.body; // set variable to equal data from the request body
 	user.id = curId++; // set the user ID value to be the increment of the size of the users array
 	if (!user.state) {
@@ -32,7 +43,7 @@ router.post('/', function (req, res) {
 	}
 	users[user.id] = user; //once the data is done compiling, add it to the users object
 	log.info('Created user', user);
-	res.json(user);
+	return res.json(user);
 });
 
 /* Get a specific user by id */
@@ -44,7 +55,7 @@ router.get('/:id', function (req, res, next) {
 		return next();
 	}
 	// otherwise, return the json data for the desired user
-	res.json(users[req.params.id]);
+	return res.json(users[req.params.id]);
 });
 
 /* Delete a user by id */
@@ -55,11 +66,17 @@ router.delete('/:id', function (req, res) {
 	// "204 (No Content) status code indicates that the server has successfully fulfilled the request and that there is no additional content to send in the response payload body"
 
 	log.info('Deleted user', user);
-	res.json(user);
+	return res.json(user);
 });
 
 /* Update a user by id */
 router.put('/:id', function (req, res, next) {
+	const validator = jsonschema.validate(req.body, userUpdateSchema);
+	if (!validator.valid) {
+		const errs = validator.errors.map((e) => e.stack);
+		throw new BadRequestError(errs);
+	}
+
 	var user = req.body;
 	// first check if the user ID in the req.body matches the ID in the URL parameter
 	if (user.id != req.params.id) {
@@ -67,7 +84,7 @@ router.put('/:id', function (req, res, next) {
 	}
 	users[user.id] = user; // sets user with updated information
 	log.info('Updating user', user);
-	res.json(user);
+	return res.json(user);
 });
 
 module.exports = router;
