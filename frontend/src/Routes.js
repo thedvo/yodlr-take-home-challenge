@@ -9,13 +9,14 @@ import SignUpForm from '../src/forms/RegisterForm';
 
 import NotFound from '../src/NotFound';
 
-const AppRoutes = () => {
+const AppRoutes = ({ signup }) => {
 	return (
 		<Routes>
 			<Route exact path="/" element={<Home />} />
 			<Route exact path="/users" element={<UserCardList />} />
 			<Route exact path="/users/:id" element={<UserDetail />} />
-			<Route exact path="/signup" element={<SignUpForm />} />
+			<Route exact path="/signup" element={<SignUpForm signup={signup} />} />
+			<Route path="*" element={<NotFound />} />
 		</Routes>
 	);
 };
